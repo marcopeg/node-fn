@@ -1,0 +1,5 @@
+{
+  "editorconfig": true,
+  "arrowParens": "always",
+  "trailingComma": "es5"
+}
