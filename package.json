@@ -4,12 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "./node_modules/.bin/nodemon --watch index.js --watch proto/index.js index.js"
+    "start": "./node_modules/.bin/nodemon --watch index.js --watch proto/index.js index.js",
+    "tdd": "./node_modules/.bin/jest --runInBand --watchAll --testTimeout=10000"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "jest": "^25.1.0",
     "nodemon": "^2.0.2"
   },
   "dependencies": {

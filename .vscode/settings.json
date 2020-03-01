@@ -1,12 +1,7 @@
 {
-  "eslint.workingDirectories": [
-    "services/micro-tapi",
-    "services/micro-workers",
-    "services/micro-webhooks"
-  ],
-  "files.watcherExclude": {
-      "**/.git/objects/**": true,
-      "**/node_modules/**": true,
-      "**/data/postgres/**": true
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }
