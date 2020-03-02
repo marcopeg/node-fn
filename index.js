@@ -1,43 +1,11 @@
 const md5 = require("md5");
 const fs = require("fs-extra");
 const path = require("path");
-const { spawn: spawnCmd } = require("child_process");
+const spawn = require("@marcopeg/spawn");
+// const spawn = require("./spawn");
 const { deserializeError } = require("serialize-error");
 
-const spawn = (cmd, options = {}) =>
-  new Promise((resolve, reject) => {
-    const tokens = cmd.split(" ");
-    const { log, ...otherOptions } = options;
-    let lastErrorMsg = "";
-
-    const process = spawnCmd(tokens.shift(), tokens, otherOptions);
-
-    if (log) {
-      process.stdout.on("data", (data) => {
-        log(data.toString().trim());
-      });
-    }
-
-    process.stderr.on("data", (data) => {
-      lastErrorMsg = data.toString().trim();
-    });
-
-    process.on("close", (code) => {
-      if (code === 0) {
-        resolve(code);
-      } else {
-        const error = new Error(lastErrorMsg);
-        error.spawnCode = code;
-        reject(error);
-      }
-    });
-
-    process.on("error", (err) => {
-      reject(err);
-    });
-  });
-
-const runInDocker = async ({ name, source, dependencies, args }) => {
+const runInDocker = async ({ name, source, dependencies = {}, args = {} }) => {
   const cacheId = md5(
     JSON.stringify({
       source,
@@ -68,15 +36,15 @@ const runInDocker = async ({ name, source, dependencies, args }) => {
     await fs.writeFile(path.join(cachePath, "fn.js"), source, "utf-8");
 
     // -> build docker image
-    const buildExitCode = await spawn(
+    const buildProcess = await spawn(
       `docker build -t fn__${name}:${cacheId} .`,
       {
         cwd: cachePath,
-        log: console.info,
+        log: ($) => console.info($),
       }
     );
 
-    if (buildExitCode !== 0) {
+    if (buildProcess.code !== 0) {
       throw new Error("Could noto build");
     }
   }
@@ -85,7 +53,7 @@ const runInDocker = async ({ name, source, dependencies, args }) => {
   const envArgs = JSON.stringify(args);
 
   const runData = [];
-  const runExitCode = await spawn(
+  const runProcess = await spawn(
     `docker run -e FN_ARGS=${envArgs} fn__${name}:${cacheId}`,
     {
       cwd: cachePath,
@@ -100,24 +68,31 @@ const runInDocker = async ({ name, source, dependencies, args }) => {
   runData.pop();
 
   if (runResult) {
+    const returnStr = runResult.substr(8);
+    let returnData = null;
+
+    try {
+      returnData =
+        returnStr === "undefined" ? undefined : JSON.parse(returnStr);
+    } catch (err) {
+      throw new Error("Could not decode function return");
+    }
+
     return {
       success: true,
-      data: JSON.parse(runResult.substr(8)),
+      return: returnData,
       process: {
-        exitCode: runExitCode,
+        exitCode: runProcess.code,
         logs: runData,
       },
     };
   } else {
     const runErrorObj = JSON.parse(runError.substr(7));
-    return {
-      success: false,
-      error: deserializeError(runErrorObj),
-      process: {
-        exitCode: runExitCode,
-        logs: runData,
-      },
+    runErrorObj.process = {
+      exitCode: runProcess.code,
+      logs: runData,
     };
+    throw runErrorObj;
   }
 };
 
@@ -127,8 +102,9 @@ runInDocker({
     const express = require('express');
 
     module.exports = async (args) => {
-      //throw new Error('fooo')
+      // throw new Error('fooo')
       console.log('run the function with', args);
+
       return {
         result: args.a + args.b * 3,
         express: typeof express
@@ -148,6 +124,7 @@ runInDocker({
     console.info(JSON.stringify(res, null, 2));
   })
   .catch((err) => {
-    console.info("there was an eerror!");
+    console.info(">>>>>>>>>>>>>>>>>>>>>> there was an error!");
     console.error(err.message);
+    console.error(err.stack);
   });

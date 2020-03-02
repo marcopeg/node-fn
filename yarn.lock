@@ -325,6 +325,11 @@
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
 
+"@marcopeg/spawn@^1.6.0":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@marcopeg/spawn/-/spawn-1.6.1.tgz#46a49c7b2c400a48c12b8bad5be42cc58f44cc2a"
+  integrity sha512-BuXBLZCRnEwO2PdstKhPvrxrRM5KoyPkKK9wcGgcVj5dQBW/RD4UHC+fvqBkOUSuybD1nSC7Kknzh/TkuL44mA==
+
 "@sinonjs/commons@^1.7.0":
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/@sinonjs/commons/-/commons-1.7.1.tgz#da5fd19a5f71177a53778073978873964f49acf1"

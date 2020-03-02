@@ -15,6 +15,7 @@
     "nodemon": "^2.0.2"
   },
   "dependencies": {
+    "@marcopeg/spawn": "^1.6.0",
     "fs-extra": "^8.1.0",
     "md5": "^2.2.1",
     "serialize-error": "^5.0.0"
